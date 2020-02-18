@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--status 是否记录log4j2本身的event信息默认OFF print level:TRACE < DEBUG < INFO <WARN < ERROR < FATAL monitorInterval 300秒检查一下配置，如果有变化不需要重启服务，自动更新 -->
+<Configuration status="INFO">
+<!-- <Configuration> -->
+	<Properties>
+		<!--自定义指定路径 -->
+		<Property name="APP_NAME">WEB_DEMO</Property>
+		<Property name="LOG_HOME">/Users/leidapeng/D/logs</Property>
+		<Property name="PATTERN_FORMAT">%d{yyyy-MM-ddHH:mm:ss.SSS}[%thread][%-5level]:%m[%l]%n</Property>
+	</Properties>
+
+	<Appenders>
+		<!--输出到控制台 -->
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout charset="UTF-8" pattern="${PATTERN_FORMAT}" />
+		</Console>
+
+		<!--循环输出到文件 fileName：当前日志存储路径 filePattern 历史日志存储路径 -->
+		<RollingRandomAccessFile
+			name="RollingFileInfo" 
+			fileName="${LOG_HOME}/${APP_NAME}_info.log"
+			filePattern="${LOG_HOME}/${APP_NAME}_info_%d{yyyy-MM-dd}.log.gz">
+			
+			<!-- 日志组合过滤器 -->
+			<Filters>
+				<!--日志登记过滤-->
+				<!--onMatch:表示匹配该级别及以上 -->
+				<!--onMismatch:表示匹配该级别以下 -->
+				<!--ACCEPT-只接受, DENY-拒绝, NEUTRAL-由下一个filter处理 -->
+				<ThresholdFilter level="WARN" onMatch="DENY" onMismatch="NEUTRAL" />
+				<!--正则过滤-->
+				<!-- <RegexFilter regex=".* test .*" onMatch="NEUTRAL" onMismatch="DENY"/> -->
+				<!-- 时间过滤器 -->
+                <!-- <TimeFilter start="05:00:00" end="05:30:00" onMatch=" NEUTRAL " onMismatch="DENY"/> -->
+			</Filters>
+			<!--日志格式 -->
+			<PatternLayout pattern="${PATTERN_FORMAT}" />
+			<!-- 日志组合过滤器 -->
+			
+			<Policies>
+				<!--文件单位,单位取格式最后一位 -->
+				<TimeBasedTriggeringPolicy interval="1" />
+				<!--日志文件大小 -->
+				<!-- <SizeBasedTriggeringPolicy size="10 MB" /> -->
+			</Policies>
+			
+			<!--最多保留文件数 -->
+			<DefaultRolloverStrategy max="7" />
+		</RollingRandomAccessFile>
+
+
+		<RollingRandomAccessFile
+			name="RollingFileError"
+			fileName="${LOG_HOME}/${APP_NAME}_error.log"
+			filePattern="${LOG_HOME}/${APP_NAME}_error_%d{yyyy-MM-dd}.log.gz">
+
+			<PatternLayout pattern="${PATTERN_FORMAT}" />
+			<Filters>
+				<!--日志登记过滤-->
+				<ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+			</Filters>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" />
+			</Policies>
+			<!--最多保留文件数 -->
+			<DefaultRolloverStrategy max="7" />
+		</RollingRandomAccessFile>
+	</Appenders>
+
+
+
+	<!-- 日志配置 -->
+	<Loggers>
+		<!-- 配置特殊日志输出级别 -->
+		<logger name="org.mybatis" level="info"></logger>
+		<logger name="org.springframework" level="info"></logger>
+		<logger name="com.pay.web.dao" level="debug"></logger>
+		<logger name="org.apache.ibatis.logging.jdbc.BaseJdbcLogger.debug" level="debug"></logger>
+		
+		
+		<!--整体日志等级 -->
+		<Root level="info">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="RollingFileInfo" />
+			<AppenderRef ref="RollingFileError" />
+		</Root>
+	</Loggers>
+</Configuration>
